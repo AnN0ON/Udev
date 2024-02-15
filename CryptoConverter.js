@@ -48,7 +48,7 @@ currencyToSelect.addEventListener('change', () => {
 const conversionOptions = {
     "ETH": ["SHARDS", "GEMSTONE"],
     "SHARDS": ["GEMSTONE"],
-    "GEMSTONE": ["ETH"]
+    "GEMSTONE": ["SHARDS","ETH"]
 };
 
 function updateCurrencyToOptions() {
