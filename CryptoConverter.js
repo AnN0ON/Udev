@@ -156,7 +156,8 @@ function convert(fromCurrency, toCurrency, amount) {
     if (fromCurrency === toCurrency) {
         return amount.toFixed(2);
     } else if (fromCurrency === "ETH" && toCurrency === "SHARDS") {
-        return (amount * ethToShardsRate).toFixed(2);
+        const roundedAmount = Math.floor(amount / 0.00050) * 0.00050;
+        return (roundedAmount * ethToShardsRate).toFixed(2);
     } else if (fromCurrency === "GEMSTONE" && toCurrency === "SHARDS") {
         return (amount * gemstoneToShardsRate).toFixed(2);
     } else if (fromCurrency === "ETH" && toCurrency === "GEMSTONE") {
