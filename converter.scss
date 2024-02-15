@@ -1,0 +1,78 @@
+html,
+body {
+    height: 100%;
+}
+
+h1,
+p,
+a,
+span,
+input,
+select,
+option {
+    font-family: 'Fira Sans', sans-serif;
+}
+
+$color-primary: #6de537;
+$color-secondary: #1a1a1a;
+
+body {
+    transition: background 300ms;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: $color-secondary;
+    background-repeat: no-repeat;
+    background-blend-mode: multiply;
+    background-position: center;
+    background-size: cover;
+}
+
+.wrapper {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    justify-content: center;
+    
+    h1 {
+        margin-bottom: 10px;
+        color: $color-primary;
+    }
+    
+    form {
+        display: flex;
+        
+        input,
+        select {
+            border: 0;
+            background: $color-primary;
+            padding: 10px;
+            color: #000;
+            
+            &:not(:last-child) {
+                margin-right: 10px;
+            }
+            
+            &:focus {
+                outline: 0;
+            }
+        }
+        
+        option {
+            
+            &:selected {
+                background: $color-secondary;
+            }
+            
+        }
+    }
+    
+    p,
+    span {
+        color: #fff;
+    }
+    
+    span {
+        margin-bottom: 50px;
+    }
+}
