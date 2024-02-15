@@ -1,0 +1,52 @@
+html, body {
+	 height: 100%;
+}
+ h1, p, a, span, input, select, option {
+	 font-family: 'Fira Sans', sans-serif;
+}
+ body {
+	 transition: background 300ms;
+	 display: flex;
+	 align-items: center;
+	 justify-content: center;
+	 background-color: #1a1a1a;
+	 background-repeat: no-repeat;
+	 background-blend-mode: multiply;
+	 background-position: center;
+	 background-size: cover;
+}
+ .wrapper {
+	 display: flex;
+	 flex-flow: column nowrap;
+	 align-items: center;
+	 justify-content: center;
+}
+ .wrapper h1 {
+	 margin-bottom: 10px;
+	 color: #6de537;
+}
+ .wrapper form {
+	 display: flex;
+}
+ .wrapper form input, .wrapper form select {
+	 border: 0;
+	 background: #6de537;
+	 padding: 10px;
+	 color: #000;
+}
+ .wrapper form input:not(:last-child), .wrapper form select:not(:last-child) {
+	 margin-right: 10px;
+}
+ .wrapper form input:focus, .wrapper form select:focus {
+	 outline: 0;
+}
+ .wrapper form option:selected {
+	 background: #1a1a1a;
+}
+ .wrapper p, .wrapper span {
+	 color: #fff;
+}
+ .wrapper span {
+	 margin-bottom: 50px;
+}
+ 
