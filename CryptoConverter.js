@@ -95,6 +95,7 @@ function validate() {
     ) {
         submit();
     } else {
+        errorMessage.textContent = '';
         resultEl.innerText = 'Select some currencies and an amount to convert';
     }
 }
