@@ -106,6 +106,7 @@ function validateAmount() {
     // Check if the amount is a valid number
     if (isNaN(inputAmount)) {
         errorMessage.textContent = 'Invalid input: Please enter a valid number';
+        resultEl.innerText = ''; // Clear the result element if there are error messages
         return;
     }
 
@@ -114,16 +115,19 @@ function validateAmount() {
         case 'ETH':
             if (inputAmount < 0) {
                 errorMessage.textContent = 'Negative values are not allowed for ETH';
+                resultEl.innerText = ''; // Clear the result element if there are error messages
             }
             break;
         case 'SHARDS':
             if (inputAmount < 0 || inputAmount % 100 !== 0) {
                 errorMessage.textContent = 'SHARDS amount must be a non-negative multiple of 100';
+                resultEl.innerText = ''; // Clear the result element if there are error messages
             }
             break;
         case 'GEMSTONE':
             if (inputAmount < 0 || !Number.isInteger(inputAmount)) {
                 errorMessage.textContent = 'GEMSTONE amount must be a non-negative integer';
+                resultEl.innerText = ''; // Clear the result element if there are error messages
             }
             break;
         default:
@@ -141,8 +145,6 @@ function submit() {
         const resultAmount = convert(currencyFromValue, currencyToValue, inputAmount);
         const toText = `${resultAmount} ${currencyToValue}`;
         resultEl.innerText = `${fromText} = ${toText}`;
-    } else {
-        resultEl.innerText = ''; // Clear the result element if there are error messages
     }
 }
 
