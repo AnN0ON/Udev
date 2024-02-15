@@ -3,22 +3,41 @@ const resultEl = document.querySelector('#result');
 const currencyFromSelect = document.querySelector('#currencyFrom');
 const amountFromInput = document.querySelector('#amountFrom');
 const currencyToSelect = document.querySelector('#currencyTo');
+const errorMessage = document.querySelector('#error-message');
 
 let currencyFromValue = currencyFromSelect.value;
 let amountFromValue = amountFromInput.value;
 let currencyToValue = currencyToSelect.value;
 
+// Update currencyFromValue on page load
+window.addEventListener('DOMContentLoaded', () => {
+    currencyFromValue = currencyFromSelect.value;
+    currencyFromSelect.dispatchEvent(new Event('change')); // Trigger change event after setting initial value
+});
+
+// Update currencyFromValue on page load
+currencyFromSelect.addEventListener('DOMContentLoaded', () => {
+    currencyFromValue = currencyFromSelect.value;
+    bodyEl.className = '';
+    bodyEl.classList.add(currencyFromSelect.value);
+    updateCurrencyToOptions();
+    adjustAmountFieldValidation();
+    validate();
+});
+
 currencyFromSelect.addEventListener('change', () => {
     currencyFromValue = currencyFromSelect.value;
     bodyEl.className = '';
     bodyEl.classList.add(currencyFromSelect.value);
-    updateCurrencyToOptions(); // Ensure this function call is here
+    updateCurrencyToOptions();
+    adjustAmountFieldValidation();
     validate();
+    amountFromInput.value = '';
 });
 
-amountFromInput.addEventListener('change', () => {
+amountFromInput.addEventListener('input', () => {
     amountFromValue = amountFromInput.value;
-    validate();
+    validateAmount();
 });
 
 currencyToSelect.addEventListener('change', () => {
@@ -26,37 +45,48 @@ currencyToSelect.addEventListener('change', () => {
     validate();
 });
 
-// Define the available conversion options based on the first selection
 const conversionOptions = {
     "ETH": ["SHARDS", "GEMSTONE"],
     "SHARDS": ["GEMSTONE"],
     "GEMSTONE": ["ETH"]
 };
 
-// Update the options available in the second selection dropdown based on the first selection
 function updateCurrencyToOptions() {
     const fromCurrency = currencyFromSelect.value;
     const toOptions = conversionOptions[fromCurrency];
-    
-    // Remove existing options
     currencyToSelect.innerHTML = '';
-    
-    // Add new options
     toOptions.forEach(option => {
         const optionElement = document.createElement('option');
         optionElement.value = option;
         optionElement.textContent = option;
         currencyToSelect.appendChild(optionElement);
     });
-
-    // Dispatch a change event on currencyToSelect
     currencyToSelect.dispatchEvent(new Event('change'));
 }
 
-// Pre-fill options in currencyToSelect on page load
-updateCurrencyToOptions();
+function adjustAmountFieldValidation() {
+    const amountInput = document.querySelector('#amountFrom');
+    switch (currencyFromValue) {
+        case 'ETH':
+            amountInput.min = '0';
+            amountInput.step = 'any';
+            amountInput.pattern = '\\d*\\.?\\d*';
+            break;
+        case 'SHARDS':
+            amountInput.min = '0';
+            amountInput.step = '100';
+            amountInput.pattern = '\\d*';
+            break;
+        case 'GEMSTONE':
+            amountInput.min = '0';
+            amountInput.step = '1';
+            amountInput.pattern = '\\d*';
+            break;
+        default:
+            break;
+    }
+}
 
-// Check input values and submit or show message.
 function validate() {
     if (
         currencyFromValue !== '' &&
@@ -69,81 +99,73 @@ function validate() {
     }
 }
 
-// Multiplies two floats without losing precision.
-function multFloats(x, y) {
-    if (String(x).length > 1 && String(y).length > 1) {
-        const xP = String(x).split('.')[1].length;
-        const yP = String(y).split('.')[1].length;
-        const _x = x * (Math.pow(10, xP));
-        const _y = y * (Math.pow(10, yP));  
-        return (_x * _y) / Math.pow(10, xP + yP);
-    } else {
-        return x * y;
-    }  
-}
+function validateAmount() {
+    errorMessage.textContent = ''; // Clear any previous error message
+    const inputAmount = parseFloat(amountFromValue);
 
-function formatFloat(number) {
-    // Check if the input is a number
-    if (typeof number !== 'number') {
-        return null; // Return null if input is not a number
+    // Check if the amount is a valid number
+    if (isNaN(inputAmount)) {
+        errorMessage.textContent = 'Invalid input: Please enter a valid number';
+        return;
     }
 
-    // Convert the number to a string
-    let strNumber = number.toString();
+    // Check if the amount is non-negative based on the selected currency
+    switch (currencyFromValue) {
+        case 'ETH':
+            if (inputAmount < 0) {
+                errorMessage.textContent = 'Negative values are not allowed for ETH';
+            }
+            break;
+        case 'SHARDS':
+            if (inputAmount < 0 || inputAmount % 100 !== 0) {
+                errorMessage.textContent = 'SHARDS amount must be a non-negative multiple of 100';
+            }
+            break;
+        case 'GEMSTONE':
+            if (inputAmount < 0 || !Number.isInteger(inputAmount)) {
+                errorMessage.textContent = 'GEMSTONE amount must be a non-negative integer';
+            }
+            break;
+        default:
+            break;
+    }
 
-    // Check if the number already has two decimal places
-    if (strNumber.includes('.')) {
-        const decimalCount = strNumber.split('.')[1].length;
-        if (decimalCount === 2) {
-            return strNumber; // Return the number as is if it already has two decimal places
-        } else if (decimalCount === 1) {
-            return strNumber + '0'; // Add one more zero decimal place if it has one decimal place
-        } else {
-            return strNumber; // Return the number as is if it has more than two decimal places
-        }
+    // Validate overall form after checking amount
+    validate();
+}
+
+function submit() {
+    if (errorMessage.textContent === '') {
+        const inputAmount = parseFloat(amountFromValue);
+        const fromText = `${amountFromValue} ${currencyFromValue}`;
+        const resultAmount = convert(currencyFromValue, currencyToValue, inputAmount);
+        const toText = `${resultAmount} ${currencyToValue}`;
+        resultEl.innerText = `${fromText} = ${toText}`;
     } else {
-        // Add two decimal places if the number doesn't have any decimals
-        return strNumber + '.00';
+        resultEl.innerText = ''; // Clear the result element if there are error messages
     }
 }
 
 function convert(fromCurrency, toCurrency, amount) {
-    // Define exchange rates
-    const ethToShardsRate = 100 / 0.00050; // Calculate the rate dynamically
-    const gemstoneToShardsRate = 100; // 1 unit of GEMSTONE is worth 100 SHARDS
-    const gemstoneToEthRate = 0.0005; // 1 GEMSTONE is worth 0.0005 ETH
+    const ethToShardsRate = 100 / 0.00050;
+    const gemstoneToShardsRate = 100;
+    const gemstoneToEthRate = 0.0005;
 
-    // Conversion logic
     if (fromCurrency === toCurrency) {
-        return amount.toFixed(2); // Return the amount formatted as a float with two decimal places if converting to the same currency
+        return amount.toFixed(2);
     } else if (fromCurrency === "ETH" && toCurrency === "SHARDS") {
-        // Calculate how many shards the amount of ETH is worth
         return (amount * ethToShardsRate).toFixed(2);
     } else if (fromCurrency === "GEMSTONE" && toCurrency === "SHARDS") {
-        // Calculate how many shards the amount of GEMSTONE is worth
         return (amount * gemstoneToShardsRate).toFixed(2);
     } else if (fromCurrency === "ETH" && toCurrency === "GEMSTONE") {
-        // Convert ETH to SHARDS, then SHARDS to GEMSTONE
         return ((amount * ethToShardsRate) / gemstoneToShardsRate).toFixed(2);
     } else if (fromCurrency === "SHARDS" && toCurrency === "ETH") {
-        // Convert SHARDS to ETH
         return (amount / ethToShardsRate / 100).toFixed(8);
     } else if (fromCurrency === "SHARDS" && toCurrency === "GEMSTONE") {
-        // Calculate how many gemstones the amount of SHARDS is worth
         return (amount / gemstoneToShardsRate).toFixed(2);
     } else if (fromCurrency === "GEMSTONE" && toCurrency === "ETH") {
-        // Convert GEMSTONE to SHARDS, then SHARDS to ETH
         return ((amount * gemstoneToShardsRate) / ethToShardsRate / 100).toFixed(8);
     } else {
-        return null; // Return null for unsupported conversions
+        return null;
     }
-}
-
-// Setup variables with result info and do request.
-function submit() {
-    const inputAmount = parseFloat(amountFromValue);
-    const fromText = `${amountFromValue} ${currencyFromValue}`;
-    const resultAmount = convert(currencyFromValue, currencyToValue, inputAmount);
-    const toText = `${resultAmount} ${currencyToValue}`;
-    resultEl.innerText = `${fromText} = ${toText}`;
 }
