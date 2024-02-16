@@ -31,8 +31,10 @@ currencyFromSelect.addEventListener('change', () => {
     bodyEl.classList.add(currencyFromSelect.value);
     updateCurrencyToOptions();
     adjustAmountFieldValidation();
+    amountFromInput.value = ''; // Clear the amount input field
+    amountFromValue = ''; // Reset the amount value
+    resultEl.innerText = ''; // Clear the result text
     validate();
-    amountFromInput.value = '';
 });
 
 amountFromInput.addEventListener('input', () => {
@@ -148,27 +150,37 @@ function submit() {
         resultEl.innerText = `${fromText} = ${toText}`;
     }
 }
+function preciseDivision(dividend, divisor, precision) {
+    const multiplier = Math.pow(10, precision);
+    const result = (dividend * multiplier) / divisor;
+    return Math.round(result) / multiplier;
+}
 
 function convert(fromCurrency, toCurrency, amount) {
-    const btcToShardsRate = 100 / 0.000020;
-    const gemstoneToShardsRate = 100;
-    const gemstoneToBtcRate = 0.000020;
+    const btcToShardsRate = 0.00000020;
+    const shardsToGemstoneRate = 100;
 
-    if (fromCurrency === toCurrency) {
-        return amount.toFixed(2);
-    } else if (fromCurrency === "BTC" && toCurrency === "SHARDS") {
-        const roundedAmount = Math.floor(amount / 0.000020) * 0.000020;
-        return (roundedAmount * btcToShardsRate).toFixed(2);
-    } else if (fromCurrency === "GEMSTONE" && toCurrency === "SHARDS") {
-        return (amount * gemstoneToShardsRate).toFixed(2);
-    } else if (fromCurrency === "BTC" && toCurrency === "GEMSTONE") {
-        return ((amount * btcToShardsRate) / gemstoneToShardsRate).toFixed(2);
+    if (fromCurrency === "BTC" && toCurrency === "SHARDS") {
+        // Calculate the number of SHARDS based on the BTC amount
+        const shards = Math.floor(amount / btcToShardsRate);
+        // Round down the number of SHARDS to the nearest hundred
+        const roundedShards = Math.floor(shards / 100) * 100;
+        return roundedShards;
     } else if (fromCurrency === "SHARDS" && toCurrency === "BTC") {
-        return (amount / btcToShardsRate / 100).toFixed(8);
+        // Convert SHARDS to BTC and remove trailing zeros
+        return parseFloat((amount * btcToShardsRate).toFixed(8)).toString();
     } else if (fromCurrency === "SHARDS" && toCurrency === "GEMSTONE") {
-        return (amount / gemstoneToShardsRate).toFixed(2);
+        // Convert SHARDS to GEMSTONE and remove trailing zeros
+        return parseFloat((amount / shardsToGemstoneRate).toFixed(8)).toString();
+    } else if (fromCurrency === "GEMSTONE" && toCurrency === "SHARDS") {
+        // Convert GEMSTONE to SHARDS
+        return (amount * shardsToGemstoneRate).toFixed(2);
     } else if (fromCurrency === "GEMSTONE" && toCurrency === "BTC") {
-        return ((amount * gemstoneToShardsRate) / btcToShardsRate / 100).toFixed(8);
+        // Convert GEMSTONE to BTC and remove trailing zeros
+        return parseFloat((amount * btcToShardsRate * shardsToGemstoneRate).toFixed(8)).toString();
+    } else if (fromCurrency === "BTC" && toCurrency === "GEMSTONE") {
+        // Convert BTC to GEMSTONE and remove trailing zeros
+        return parseFloat((amount / btcToShardsRate / shardsToGemstoneRate).toFixed(8)).toString();
     } else {
         return null;
     }
