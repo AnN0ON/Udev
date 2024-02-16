@@ -46,9 +46,9 @@ currencyToSelect.addEventListener('change', () => {
 });
 
 const conversionOptions = {
-    "ETH": ["SHARDS", "GEMSTONE"],
+    "BTC": ["SHARDS", "GEMSTONE"],
     "SHARDS": ["GEMSTONE"],
-    "GEMSTONE": ["SHARDS","ETH"]
+    "GEMSTONE": ["SHARDS","BTC"]
 };
 
 function updateCurrencyToOptions() {
@@ -67,7 +67,7 @@ function updateCurrencyToOptions() {
 function adjustAmountFieldValidation() {
     const amountInput = document.querySelector('#amountFrom');
     switch (currencyFromValue) {
-        case 'ETH':
+        case 'BTC':
             amountInput.min = '0';
             amountInput.step = 'any';
             amountInput.pattern = '\\d*\\.?\\d*';
@@ -113,21 +113,21 @@ function validateAmount() {
 
     // Check if the amount is non-negative based on the selected currency
     switch (currencyFromValue) {
-        case 'ETH':
+        case 'BTC':
             if (inputAmount < 0) {
-                errorMessage.textContent = 'Negative values are not allowed for ETH';
+                errorMessage.textContent = 'Negative values are not allowed for BTC';
                 resultEl.innerText = ''; // Clear the result element if there are error messages
             }
             break;
         case 'SHARDS':
             if (inputAmount < 0 || inputAmount % 100 !== 0) {
-                errorMessage.textContent = 'SHARDS amount must be a non-negative multiple of 100';
+                errorMessage.textContent = 'SHARDS amount must be greater than 0 and multiple of 100 ( ex: 100,200,300)';
                 resultEl.innerText = ''; // Clear the result element if there are error messages
             }
             break;
         case 'GEMSTONE':
             if (inputAmount < 0 || !Number.isInteger(inputAmount)) {
-                errorMessage.textContent = 'GEMSTONE amount must be a non-negative integer';
+                errorMessage.textContent = 'GEMSTONE amount must be greater than 0 without decimals';
                 resultEl.innerText = ''; // Clear the result element if there are error messages
             }
             break;
@@ -150,25 +150,25 @@ function submit() {
 }
 
 function convert(fromCurrency, toCurrency, amount) {
-    const ethToShardsRate = 100 / 0.00050;
+    const btcToShardsRate = 100 / 0.000020;
     const gemstoneToShardsRate = 100;
-    const gemstoneToEthRate = 0.0005;
+    const gemstoneToBtcRate = 0.000020;
 
     if (fromCurrency === toCurrency) {
         return amount.toFixed(2);
-    } else if (fromCurrency === "ETH" && toCurrency === "SHARDS") {
-        const roundedAmount = Math.floor(amount / 0.00050) * 0.00050;
-        return (roundedAmount * ethToShardsRate).toFixed(2);
+    } else if (fromCurrency === "BTC" && toCurrency === "SHARDS") {
+        const roundedAmount = Math.floor(amount / 0.000020) * 0.000020;
+        return (roundedAmount * btcToShardsRate).toFixed(2);
     } else if (fromCurrency === "GEMSTONE" && toCurrency === "SHARDS") {
         return (amount * gemstoneToShardsRate).toFixed(2);
-    } else if (fromCurrency === "ETH" && toCurrency === "GEMSTONE") {
-        return ((amount * ethToShardsRate) / gemstoneToShardsRate).toFixed(2);
-    } else if (fromCurrency === "SHARDS" && toCurrency === "ETH") {
-        return (amount / ethToShardsRate / 100).toFixed(8);
+    } else if (fromCurrency === "BTC" && toCurrency === "GEMSTONE") {
+        return ((amount * btcToShardsRate) / gemstoneToShardsRate).toFixed(2);
+    } else if (fromCurrency === "SHARDS" && toCurrency === "BTC") {
+        return (amount / btcToShardsRate / 100).toFixed(8);
     } else if (fromCurrency === "SHARDS" && toCurrency === "GEMSTONE") {
         return (amount / gemstoneToShardsRate).toFixed(2);
-    } else if (fromCurrency === "GEMSTONE" && toCurrency === "ETH") {
-        return ((amount * gemstoneToShardsRate) / ethToShardsRate / 100).toFixed(8);
+    } else if (fromCurrency === "GEMSTONE" && toCurrency === "BTC") {
+        return ((amount * gemstoneToShardsRate) / btcToShardsRate / 100).toFixed(8);
     } else {
         return null;
     }
