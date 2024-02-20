@@ -173,17 +173,20 @@ function convert(fromCurrency, toCurrency, amount) {
         // Convert SHARDS to SATS and remove trailing zeros
         return parseFloat((amount / satsToShardsRate).toFixed(8)).toString();
     } else if (fromCurrency === "SHARDS" && toCurrency === "GEMSTONE") {
-        // Convert SHARDS to GEMSTONE and remove trailing zeros
-        return parseFloat((amount / shardsToGemstoneRate).toFixed(8)).toString();
+        // Calculate the number of GEMSTONE based on the SHARDS amount
+        const gemstones = Math.floor(amount / shardsToGemstoneRate);
+        // Round down the number of GEMSTONE to the nearest integer
+        return Math.floor(gemstones);
     } else if (fromCurrency === "GEMSTONE" && toCurrency === "SHARDS") {
         // Convert GEMSTONE to SHARDS
         return (amount * shardsToGemstoneRate).toFixed(2);
     } else if (fromCurrency === "GEMSTONE" && toCurrency === "SATS") {
-        // Convert GEMSTONE to SATS and remove trailing zeros
-        return parseFloat((amount * satsToGemstoneRate).toFixed(8)).toString();
+        // Convert GEMSTONE to SATS
+        return (amount * satsToGemstoneRate);
     } else if (fromCurrency === "SATS" && toCurrency === "GEMSTONE") {
-        // Convert SATS to GEMSTONE and remove trailing zeros
-        return parseFloat((amount / satsToGemstoneRate).toFixed(8)).toString();
+        // Calculate the number of GEMSTONE based on the SATS amount
+        const gemstones = Math.floor(amount / satsToGemstoneRate);
+        return gemstones;
     } else {
         return null;
     }
