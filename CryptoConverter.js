@@ -48,9 +48,9 @@ currencyToSelect.addEventListener('change', () => {
 });
 
 const conversionOptions = {
-    "BTC": ["SHARDS", "GEMSTONE"],
+    "SATS": ["SHARDS", "GEMSTONE"],
     "SHARDS": ["GEMSTONE"],
-    "GEMSTONE": ["SHARDS","BTC"]
+    "GEMSTONE": ["SHARDS","SATS"]
 };
 
 function updateCurrencyToOptions() {
@@ -69,7 +69,7 @@ function updateCurrencyToOptions() {
 function adjustAmountFieldValidation() {
     const amountInput = document.querySelector('#amountFrom');
     switch (currencyFromValue) {
-        case 'BTC':
+        case 'SATS':
             amountInput.min = '0';
             amountInput.step = 'any';
             amountInput.pattern = '\\d*\\.?\\d*';
@@ -115,9 +115,9 @@ function validateAmount() {
 
     // Check if the amount is non-negative based on the selected currency
     switch (currencyFromValue) {
-        case 'BTC':
+        case 'SATS':
             if (inputAmount < 0) {
-                errorMessage.textContent = 'Negative values are not allowed for BTC';
+                errorMessage.textContent = 'Negative values are not allowed for SATS';
                 resultEl.innerText = ''; // Clear the result element if there are error messages
             }
             break;
@@ -157,30 +157,33 @@ function preciseDivision(dividend, divisor, precision) {
 }
 
 function convert(fromCurrency, toCurrency, amount) {
-    const btcToShardsRate = 0.00000020;
+    const satsToShardsRate = 0.05;
     const shardsToGemstoneRate = 100;
+    const satsToGemstoneRate = 2000;
 
-    if (fromCurrency === "BTC" && toCurrency === "SHARDS") {
-        // Calculate the number of SHARDS based on the BTC amount
-        const shards = Math.floor(amount / btcToShardsRate);
+    if (fromCurrency === "SATS" && toCurrency === "SHARDS") {
+        // Calculate the previous multiple of 2000 SATS
+        const previousMultiple = Math.floor(amount / satsToGemstoneRate) * satsToGemstoneRate;
+        // Calculate the number of SHARDS based on the previous multiple of 2000 SATS
+        const shards = Math.floor(previousMultiple * satsToShardsRate);
         // Round down the number of SHARDS to the nearest hundred
         const roundedShards = Math.floor(shards / 100) * 100;
         return roundedShards;
-    } else if (fromCurrency === "SHARDS" && toCurrency === "BTC") {
-        // Convert SHARDS to BTC and remove trailing zeros
-        return parseFloat((amount * btcToShardsRate).toFixed(8)).toString();
+    } else if (fromCurrency === "SHARDS" && toCurrency === "SATS") {
+        // Convert SHARDS to SATS and remove trailing zeros
+        return parseFloat((amount / satsToShardsRate).toFixed(8)).toString();
     } else if (fromCurrency === "SHARDS" && toCurrency === "GEMSTONE") {
         // Convert SHARDS to GEMSTONE and remove trailing zeros
         return parseFloat((amount / shardsToGemstoneRate).toFixed(8)).toString();
     } else if (fromCurrency === "GEMSTONE" && toCurrency === "SHARDS") {
         // Convert GEMSTONE to SHARDS
         return (amount * shardsToGemstoneRate).toFixed(2);
-    } else if (fromCurrency === "GEMSTONE" && toCurrency === "BTC") {
-        // Convert GEMSTONE to BTC and remove trailing zeros
-        return parseFloat((amount * btcToShardsRate * shardsToGemstoneRate).toFixed(8)).toString();
-    } else if (fromCurrency === "BTC" && toCurrency === "GEMSTONE") {
-        // Convert BTC to GEMSTONE and remove trailing zeros
-        return parseFloat((amount / btcToShardsRate / shardsToGemstoneRate).toFixed(8)).toString();
+    } else if (fromCurrency === "GEMSTONE" && toCurrency === "SATS") {
+        // Convert GEMSTONE to SATS and remove trailing zeros
+        return parseFloat((amount * satsToGemstoneRate).toFixed(8)).toString();
+    } else if (fromCurrency === "SATS" && toCurrency === "GEMSTONE") {
+        // Convert SATS to GEMSTONE and remove trailing zeros
+        return parseFloat((amount / satsToGemstoneRate).toFixed(8)).toString();
     } else {
         return null;
     }
